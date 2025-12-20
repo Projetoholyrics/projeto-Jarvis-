@@ -77,3 +77,20 @@ button {
   border: none;
   cursor: pointer;
 }
+.circle {
+  position: relative;
+}
+
+.circle::after {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,229,255,0.4);
+  animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
