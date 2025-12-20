@@ -11,6 +11,10 @@ let jarvisAtivo = false;
 let modoConversa = false;
 let memoria = [];
 let estadoJarvis = "neutro";
+let protocoloAtivo = false;
+let protocoloEtapa = 0;
+let humorJarvis = "neutro"; // neutro | irônico | sério
+let ultimoComando = "";
 
 // =======================
 // MEMÓRIA
@@ -52,6 +56,39 @@ function speak(text) {
 
   utterance.onend = () => setState("idle");
 }
+function responderComPersonalidade(textoBase) {
+  const respostas = {
+    neutro: [
+      textoBase,
+      textoBase + ", senhor."
+    ],
+    ironico: [
+      textoBase + ". Como sempre.",
+      textoBase + ". Naturalmente.",
+      textoBase + ". Estou impressionado, senhor."
+    ],
+    serio: [
+      textoBase + ". Executando.",
+      textoBase + ". Confirmado."
+    ]
+  };
+
+  const lista = respostas[humorJarvis] || respostas.neutro;
+  const respostaFinal = lista[Math.floor(Math.random() * lista.length)];
+
+  speak(respostaFinal);
+}
+function avaliarHumor(command) {
+  if (command.includes("de novo") || command.includes("rápido")) {
+    humorJarvis = "ironico";
+  } 
+  else if (command.includes("urgente") || command.includes("agora")) {
+    humorJarvis = "serio";
+  } 
+  else {
+    humorJarvis = "neutro";
+  }
+}
 
 // =======================
 // RECONHECIMENTO
@@ -91,9 +128,19 @@ window.onload = () => recognition.start();
 // =======================
 // COMANDOS
 // =======================
+
 function processCommand() {
+ 
   const command = input.value.toLowerCase();
   if (!command) return;
+if (command.includes("ativar protocolo")) {
+  iniciarProtocoloJarvis();
+  return;
+}
+if (protocoloAtivo) {
+  speak("Protocolo em execução. Aguarde.");
+  return;
+}
 
   salvarMemoria(command);
 
@@ -240,3 +287,29 @@ document.getElementById("btnExecutar").onclick = () => {
   jarvisAtivo = true;
   processCommand();
 };
+function iniciarProtocoloJarvis() {
+  protocoloAtivo = true;
+  protocoloEtapa = 0;
+
+  setState("speaking");
+  speak("Iniciando protocolos J.A.R.V.I.S.");
+
+  setTimeout(() => {
+    speak("Sistemas online.");
+  }, 2500);
+
+  setTimeout(() => {
+    speak("Análise de ambiente concluída.");
+  }, 5200);
+
+  setTimeout(() => {
+    speak("Todos os módulos operacionais.");
+  }, 8200);
+
+  setTimeout(() => {
+    speak("Às suas ordens, senhor.");
+    protocoloAtivo = false;
+    jarvisAtivo = true;
+    setState("idle");
+  }, 11000);
+}

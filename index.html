@@ -3,37 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <title>J.A.R.V.I.S</title>
+
+  <!-- Fonte futurista (opcional, mas recomendada) -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="jarvis-container">
+  <div class="jarvis-container">
 
-  <!-- HUD HOLOGRÁFICO -->
-  <div id="hud">
-    <div id="circle" class="circle idle">
-      <div class="ring ring1"></div>
-      <div class="ring ring2"></div>
-      <div class="core"></div>
+    <!-- HUD HOLOGRÁFICO (HOMEM DE FERRO) -->
+    <div id="hud">
+      <div id="circle" class="circle idle">
+        <div class="ring ring1"></div>
+        <div class="ring ring2"></div>
+        <div class="core"></div>
+      </div>
+
+      <!-- STATUS (controlado pelo jarvis.js) -->
+      <div id="status">INATIVO</div>
     </div>
-    <div id="status">INATIVO</div>
+
+    <!-- RESPOSTAS / LOG -->
+    <div id="output">Às suas ordens, senhor...</div>
+
+    <!-- INPUT DE COMANDO -->
+    <input
+      type="text"
+      id="commandInput"
+      placeholder="Digite ou fale um comando..."
+      autocomplete="off"
+    >
+
+    <!-- BOTÕES (NÃO DESATIVADOS) -->
+    <div class="buttons">
+      <button id="btnExecutar">▶ EXECUTAR</button>
+      <button id="btnFalar">🎤 FALAR</button>
+    </div>
+
   </div>
 
-  <div id="output">Às suas ordens, senhor...</div>
+  <!-- SCRIPT PRINCIPAL -->
+  <script src="jarvis.js"></script>
 
-  <input 
-    type="text" 
-    id="commandInput" 
-    placeholder="Digite ou fale um comando..."
-  >
-
-  <div class="buttons">
-    <button id="btnExecutar">Executar</button>
-    <button id="btnFalar">🎤 Falar</button>
-  </div>
-
-</div>
-
-<script src="jarvis.js"></script>
 </body>
 </html>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
