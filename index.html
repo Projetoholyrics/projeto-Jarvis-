@@ -9,9 +9,17 @@
 
 <div class="jarvis-container">
 
-  <div id="circle" class="circle idle"></div>
+  <!-- HUD HOLOGRÁFICO -->
+  <div id="hud">
+    <div id="circle" class="circle idle">
+      <div class="ring ring1"></div>
+      <div class="ring ring2"></div>
+      <div class="core"></div>
+    </div>
+    <div id="status">INATIVO</div>
+  </div>
 
-  <div id="output">As suas Ordens Senhor...</div>
+  <div id="output">Às suas ordens, senhor...</div>
 
   <input 
     type="text" 
@@ -20,8 +28,8 @@
   >
 
   <div class="buttons">
-    <button onclick="processCommand()">Executar</button>
-    <button onclick="startListening()">🎤 Falar</button>
+    <button id="btnExecutar">Executar</button>
+    <button id="btnFalar">🎤 Falar</button>
   </div>
 
 </div>
