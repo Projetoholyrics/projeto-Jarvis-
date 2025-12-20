@@ -1,64 +1,80 @@
-// =======================
-// ELEMENTOS DA TELA
-// =======================
 const output = document.getElementById("output");
 const input = document.getElementById("commandInput");
 const circle = document.getElementById("circle");
+const statusText = document.getElementById("status");
+
+
+// =======================
+// ESTADOS
+// =======================
 let jarvisAtivo = false;
-let memoria = [];
 let modoConversa = false;
+let memoria = [];
+let estadoJarvis = "neutro";
 
 // =======================
-// SPEECH RECOGNITION
+// MEMÓRIA
 // =======================
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-if (!SpeechRecognition) {
-  alert("Seu navegador não suporta reconhecimento de voz.");
-}
-
-const recognition = new SpeechRecognition();
-recognition.lang = "pt-BR";
-recognition.continuous = false;
-recognition.interimResults = false;
-
-// =======================
-// ESTADO DO CÍRCULO
-// =======================
-function setState(state) {
-  circle.className = "circle " + state;
-}
 function salvarMemoria(texto) {
   memoria.push(texto);
   if (memoria.length > 10) memoria.shift();
 }
 
 // =======================
-// BOTÃO FALAR
+// ESTADO VISUAL
 // =======================
-function startListening() {
-  try {
-    window.speechSynthesis.cancel();
-    setState("listening");
-    recognition.start();
-  } catch (e) {
-    console.error("Erro ao iniciar microfone", e);
+function setState(state) {
+  circle.classList.remove("idle", "listening", "speaking");
+
+  if (state === "idle") {
+    circle.classList.add("idle");
+    statusText.innerText = "INATIVO";
+  }
+  if (state === "listening") {
+    circle.classList.add("listening");
+    statusText.innerText = "OUVINDO";
+  }
+  if (state === "speaking") {
+    circle.classList.add("speaking");
+    statusText.innerText = "FALANDO";
   }
 }
-recognition.onresult = (event) => {
-  recognition.stop();
-recognition.onend = () => {
-  iniciarEscutaGlobal();
-};
 
-  const command = event.results[0][0].transcript
-    .toLowerCase()
-    .replace(/[?.!,]/g, "");
+// =======================
+// VOZ
+// =======================
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "pt-BR";
+
+  setState("speaking");
+  speechSynthesis.speak(utterance);
+
+  utterance.onend = () => setState("idle");
+}
+
+// =======================
+// RECONHECIMENTO
+// =======================
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const recognition = new SpeechRecognition();
+recognition.lang = "pt-BR";
+recognition.continuous = true;
+
+recognition.onresult = (event) => {
+  setState("listening");
+
+  function abrirArquivo(nome) {
+  ipcRenderer.send("abrir-arquivo", nome);
+}
+
+  const command =
+    event.results[event.results.length - 1][0].transcript.toLowerCase();
 
   input.value = command;
 
-  // ATIVAÇÃO
   if (!jarvisAtivo && command.includes("ei jarvis")) {
     jarvisAtivo = true;
     modoConversa = true;
@@ -66,126 +82,161 @@ recognition.onend = () => {
     return;
   }
 
-  // SE NÃO ESTIVER ATIVO, IGNORA
-  if (!jarvisAtivo && !modoConversa) return;
-
-  processCommand();
+  if (jarvisAtivo) processCommand();
 };
 
-
-// Depois de executar o comando
-jarvisAtivo = false;
-
+recognition.onend = () => recognition.start();
+window.onload = () => recognition.start();
 
 // =======================
-// FALAR
+// COMANDOS
 // =======================
-function speak(text) {
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "pt-BR";
-
-  setState("speaking");
-  output.innerText = text;
-
- circle.style.boxShadow = "0 0 40px #00e5ff";
-
-utterance.onend = () => {
-  circle.style.boxShadow = "0 0 20px #00e5ff";
-  setState("idle");
-};
-
-  window.speechSynthesis.speak(utterance);
-}
-
-// =======================
-// IA
-// =======================
-async function askIA(message) {
-  try {
-    const response = await fetch("http://localhost:3000/ia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await response.json();
-    speak(data.reply || "Não obtive resposta.");
-  } catch (e) {
-    speak("Erro ao acessar a inteligência artificial.");
-  }
-}
-
 function processCommand() {
-  if (!input.value) return;
+  const command = input.value.toLowerCase();
+  if (!command) return;
 
-  const command = input.value
-    .toLowerCase()
-    .replace(/[?.!,]/g, "");
+  salvarMemoria(command);
 
-  if (command.includes("jarvis")) {
-    speak("Olá, senhor.");
-  }
-
-  else if (command.includes("que horas")) {
+  // -------- SISTEMA --------
+  if (command.includes("hora")) {
     speak("Agora são " + new Date().toLocaleTimeString());
   }
 
-  else if (command.includes("que dia é hoje")) {
+  else if (command.includes("dia")) {
     speak("Hoje é " + new Date().toLocaleDateString());
   }
+// -------- PESQUISA NA INTERNET --------
+else if (
+  command.includes("pesquise") ||
+  command.includes("pesquisar") ||
+  command.includes("buscar") ||
+  command.includes("procure")
+) {
+  let termo = command
+    .replace("pesquise", "")
+    .replace("pesquisar", "")
+    .replace("buscar", "")
+    .replace("procure", "")
+    .replace("no google", "")
+    .trim();
 
-  else if (command.includes("seu nome")) {
-    speak("Meu nome é JARVIS, uma inteligência artificial criada e programada por Davi Samuel");
+  if (termo.length === 0) {
+    speak("O que exatamente devo pesquisar, senhor?");
+    return;
   }
 
+  speak("Pesquisando sobre " + termo + ", senhor.");
+  window.open(
+    "https://www.google.com/search?q=" + encodeURIComponent(termo),
+    "_blank"
+  );
+}
+// -------- ABRIR ARQUIVO PELO NOME --------
+else if (
+  command.includes("abrir arquivo") ||
+  command.includes("abrir o arquivo") ||
+  command.includes("abrir")
+) {
+  let nome = command
+    .replace("abrir arquivo", "")
+    .replace("abrir o arquivo", "")
+    .replace("abrir", "")
+    .trim();
+
+  if (nome.length === 0) {
+    speak("Qual arquivo devo abrir, senhor?");
+    return;
+  }
+ipcRenderer.on("arquivo-nao-encontrado", (event, nome) => {
+  speak("Não encontrei nenhum arquivo com o nome " + nome + ", senhor.");
+});
+
+  speak("Procurando o arquivo " + nome + ", senhor.");
+  abrirArquivo(nome);
+}
+
+  else if (command.includes("quem é você")) {
+    speak("Sou JARVIS, senhor. Seu assistente pessoal.");
+  }
+
+  else if (command.includes("encerrar")) {
+    jarvisAtivo = false;
+    modoConversa = false;
+    speak("Conversa encerrada.");
+  }
+
+  // -------- PROGRAMAS --------
+  else if (command.includes("abrir bloco de notas")) {
+    speak("Abrindo o Bloco de Notas, senhor.");
+    executarNoWindows("notepad");
+  }
+
+  else if (command.includes("abrir calculadora")) {
+    speak("Abrindo a calculadora, senhor.");
+    executarNoWindows("calc");
+  }
+
+  else if (command.includes("abrir downloads")) {
+    speak("Abrindo a pasta Downloads, senhor.");
+    executarNoWindows("explorer %USERPROFILE%\\Downloads");
+  }
+
+  // -------- INTERNET --------
   else if (command.includes("abrir youtube")) {
-    speak("Abrindo o YouTube.");
-    window.open("https://youtube.com");
+    speak("Abrindo o YouTube, senhor.");
+    window.open("https://www.youtube.com", "_blank");
   }
 
-  else if (command.includes("encerrar conversa")) {
-  modoConversa = false;
-  jarvisAtivo = false;
-  speak("Conversa encerrada.");
-  return;
+  else if (command.includes("abrir google")) {
+    speak("Abrindo o Google, senhor.");
+    window.open("https://www.google.com", "_blank");
+  }
+// -------- PESQUISA NO YOUTUBE --------
+else if (
+  command.includes("youtube") &&
+  (
+    command.includes("pesquise") ||
+    command.includes("pesquisar") ||
+    command.includes("buscar") ||
+    command.includes("procure")
+  )
+) {
+  let termo = command
+    .replace("pesquise", "")
+    .replace("pesquisar", "")
+    .replace("buscar", "")
+    .replace("procure", "")
+    .replace("no youtube", "")
+    .replace("youtube", "")
+    .trim();
+
+  if (termo.length === 0) {
+    speak("O que deseja pesquisar no YouTube, senhor?");
+    return;
+  }
+
+  speak("Pesquisando no YouTube sobre " + termo + ", senhor.");
+  window.open(
+    "https://www.youtube.com/results?search_query=" +
+      encodeURIComponent(termo),
+    "_blank"
+  );
 }
 
+  // -------- FALLBACK --------
   else {
-    askIA(command);
-  }
-
-  jarvisAtivo = false;
-  input.value = "";
-}
-async function askIA(message) {
-  try {
-    const response = await fetch("http://localhost:3000/ia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await response.json();
-    speak(data.reply);
-
-    salvarMemoria("Usuário: " + message);
-    salvarMemoria("JARVIS: " + data.reply);
-
-  } catch (e) {
-    speak("Erro ao acessar a inteligência artificial.");
-  }
-}
-function iniciarEscutaGlobal() {
-  try {
-    recognition.start();
-    console.log("🎧 JARVIS escutando...");
-  } catch (e) {
-    console.log("Reconhecimento já iniciado");
+    speak("Comando recebido, senhor.");
   }
 }
 
-window.onload = () => {
-  iniciarEscutaGlobal();
+// =======================
+// BOTÕES
+// =======================
+document.getElementById("btnFalar").onclick = () => {
+  recognition.start();
+};
+
+document.getElementById("btnExecutar").onclick = () => {
+  jarvisAtivo = true;
+  processCommand();
 };

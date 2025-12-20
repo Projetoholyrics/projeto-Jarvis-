@@ -1,7 +1,7 @@
 body {
-  background: radial-gradient(circle, #081b2c, #000);
-  font-family: 'Segoe UI', sans-serif;
-  color: #00e5ff;
+  background: radial-gradient(circle at center, #020b14, #000);
+  font-family: "Segoe UI", sans-serif;
+  color: #7df9ff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,52 +12,56 @@ body {
   text-align: center;
 }
 
-.circle {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  border: 4px solid #00e5ff;
-  margin: 0 auto 20px;
-  box-shadow: 0 0 20px #00e5ff;
+/* HUD */
+#hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
+
+/* CÍRCULO */
+.circle {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 20px #00e5ff);
+}
+
+/* NÚCLEO */
+.core {
+  position: absolute;
+  inset: 70px;
+  background: radial-gradient(circle, #7df9ff, #007a8a);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* ANÉIS */
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,229,255,0.4);
+}
+
+.ring1 { animation: spin 12s linear infinite; }
+.ring2 { inset: 15px; animation: spinReverse 8s linear infinite; }
 
 /* ESTADOS */
-.idle {
-  animation: pulse 3s infinite;
+.circle.idle { opacity: 0.5; }
+.circle.listening { filter: drop-shadow(0 0 35px #00ffea); }
+.circle.speaking .core { animation: pulseFast 0.6s infinite; }
+
+#status {
+  margin-top: 10px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  opacity: 0.8;
 }
 
-.listening {
-  animation: listening 1s infinite;
-}
-
-.speaking {
-  animation: speaking 0.6s infinite;
-}
-
-/* ANIMAÇÕES */
-@keyframes pulse {
-  0% { box-shadow: 0 0 10px #00e5ff; }
-  50% { box-shadow: 0 0 25px #00e5ff; }
-  100% { box-shadow: 0 0 10px #00e5ff; }
-}
-
-@keyframes listening {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-@keyframes speaking {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-
-#output {
-  margin: 15px;
-  min-height: 50px;
-}
-
+/* INPUT */
 input {
   width: 260px;
   padding: 10px;
@@ -66,6 +70,7 @@ input {
   color: #00e5ff;
 }
 
+/* BOTÕES */
 .buttons {
   margin-top: 10px;
 }
@@ -77,20 +82,26 @@ button {
   border: none;
   cursor: pointer;
 }
-.circle {
-  position: relative;
-}
 
-.circle::after {
-  content: "";
-  position: absolute;
-  inset: -15px;
-  border-radius: 50%;
-  border: 1px dashed rgba(0,229,255,0.4);
-  animation: rotate 10s linear infinite;
-}
-
-@keyframes rotate {
+/* ANIMAÇÕES */
+@keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes pulseFast {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
 }
