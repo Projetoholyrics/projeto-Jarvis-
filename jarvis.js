@@ -48,6 +48,9 @@ function startListening() {
 }
 recognition.onresult = (event) => {
   recognition.stop();
+recognition.onend = () => {
+  iniciarEscutaGlobal();
+};
 
   const command = event.results[0][0].transcript
     .toLowerCase()
@@ -174,3 +177,15 @@ async function askIA(message) {
     speak("Erro ao acessar a inteligência artificial.");
   }
 }
+function iniciarEscutaGlobal() {
+  try {
+    recognition.start();
+    console.log("🎧 JARVIS escutando...");
+  } catch (e) {
+    console.log("Reconhecimento já iniciado");
+  }
+}
+
+window.onload = () => {
+  iniciarEscutaGlobal();
+};
