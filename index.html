@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>J.A.R.V.I.S</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="jarvis-container">
+
+  <div id="circle" class="circle idle"></div>
+
+  <div id="output">As suas Ordens Senhor...</div>
+
+  <input 
+    type="text" 
+    id="commandInput" 
+    placeholder="Digite ou fale um comando..."
+  >
+
+  <div class="buttons">
+    <button onclick="processCommand()">Executar</button>
+    <button onclick="startListening()">🎤 Falar</button>
+  </div>
+
+</div>
+
+<script src="jarvis.js"></script>
+</body>
+</html>
