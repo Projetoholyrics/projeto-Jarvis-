@@ -9,6 +9,7 @@
 
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00eaff">
+<link - rel="manifest" href="%PUBLIC_URL%manifest.json"/>
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css">
@@ -56,7 +57,12 @@
     navigator.serviceWorker.register("service-worker.js");
   }
 </script>
-
+<title>Assitênte Jarvis</title>
+<script>
+  if(typeof navigator.servicework !== 'undefined') {
+    navigator.servicework.register('pwabuilder-sw.js')
+  }
+</script>
 </body>
 </html>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
