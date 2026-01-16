@@ -117,10 +117,18 @@ def encerramento():
 # ================================
 
 def jarvis_emocional():
-    salvar_historico("=== Nova conversa iniciada ===")
     acolhimento()
-    escuta()
-    validacao()
+    texto = escuta()
+
+    sentimento = analisar_sentimento(texto)
+
+    if sentimento == "triste":
+        print("\nJARVIS:")
+        print("Sinto muito que você esteja se sentindo assim.")
+        print("Você não precisa passar por isso sozinho.\n")
+    else:
+        validacao()
+
     clareza()
     forca()
     opcao = escolha()
