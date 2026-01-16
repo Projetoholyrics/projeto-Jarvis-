@@ -1,3 +1,5 @@
+import json
+
 # ================================
 # JARVIS - APOIO EMOCIONAL
 # Criado para acolher, escutar e ajudar
@@ -90,8 +92,23 @@ def jarvis_emocional():
     resposta_escolha(opcao)
     encerramento()
 
+def carregar_config():
+    with open("config.json", "r",
+              encoding="utf-8") as arquivo:
+        return json.load(arquivo)
+
+config = carregar_config()
 
 # ===== EXECUÇÃO =====
 if __name__ == "__main__":
     print("=== JARVIS | Apoio Emocional ===")
     jarvis_emocional()
+
+if config["usar_fe"]:
+    print("Deus continua cuidando de você mesmo nesse momento. ")
+
+print(f"Estou aqui, {config['nome_usuario']}.")
+
+if config["salvar_historico"]:
+    with open("historico.txt", "a", encoding="utf-8") as h:
+        h.write("Usuário iniciou conversa\n")
